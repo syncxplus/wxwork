@@ -6,18 +6,13 @@
 <body>
 <include href="common/navbar.html"/>
 <h3>Hello world</h3>
-<script src="{{@BASE}}/common/wxinit.js"></script>
+<include href="common/wxinit.html"/>
 <script>
     $(function () {
         wx.ready(function () {
-            wx.checkJsApi({
-                jsApiList: jsApiList,
-                success: function (data) {
-                    if (confirm("Close?")) {
-                        wx.closeWindow();
-                    }
-                }
-            })
+            if (confirm("Close?")) {
+                wx.closeWindow();
+            }
         });
     })
 </script>
