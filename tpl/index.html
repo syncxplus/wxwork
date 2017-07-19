@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include href="common/header.html"/>
+</head>
+<body>
+<include href="common/navbar.html"/>
+<h3>Hello world</h3>
+<script src="{{@BASE}}/common/wxinit.js"></script>
+<script>
+    $(function () {
+        wx.ready(function () {
+            wx.checkJsApi({
+                jsApiList: jsApiList,
+                success: function (data) {
+                    if (confirm("Close?")) {
+                        wx.closeWindow();
+                    }
+                }
+            })
+        });
+    })
+</script>
+</body>
+</html>

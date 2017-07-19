@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include href="common/header.html"/>
+    <style>
+        .login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .input {
+            margin: 10px auto;
+        }
+        .input>span {
+            width: 80px;
+            display: inline-block;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .input>input {
+            width: 200px;
+        }
+        .btn-group {
+            margin: 10px auto;
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+<div class="login">
+    <div class="input"><span>用户名</span><input id="username" name="username" type="text"/></div>
+    <div class="input"><span>密码</span><input id="password" name="password" type="password"/></div>
+    <div class="btn-group">
+        <div id="login-clear" class="btn btn-default">清除</div>
+        <div id="login-submit" class="btn btn-primary">提交</div>
+    </div>
+</div>
+<script src="http://cdn.bootcss.com/blueimp-md5/2.6.0/js/md5.min.js"></script>
+<script>
+    $(function () {
+        var btnGroup = $(".btn-group");
+        btnGroup.css("width", $(".input").width());
+        $(".login").css("height", $(window).height() - btnGroup.outerHeight());
+
+        $("#login-submit").click(function () {
+            var username = $("#username").val().trim();
+            var password = $("#password").val().trim();
+            if (!username) {
+                alert("用户名不能为空");
+                return $("#username").focus();
+            } else if (!password) {
+                alert("密码不能为空");
+                return $("#password").focus();
+            }
+            $.post(location.href, {username: username, password: md5(password)})
+                .done(function (data) {
+                    console.log(data)
+                    var json = JSON.parse(data);
+                    if (json.error.code === 0) {
+                        location.href = getCookie("target");
+                    } else {
+                        alert(data);
+                    }
+                })
+                .fail(function (error) {
+                    console.error(error);
+                    alert(error);
+                })
+        });
+
+        $("#login-clear").click(function () {
+            $("input").val('');
+        });
+    });
+</script>
+</body>
+</html>
