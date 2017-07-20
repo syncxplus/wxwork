@@ -15,7 +15,7 @@
         .input>span {
             width: 80px;
             display: inline-block;
-            text-align: right;
+            text-align: left;
             padding-right: 10px;
         }
         .input>input {
@@ -33,7 +33,7 @@
     <div class="input"><span>用户名</span><input id="username" name="username" type="text"/></div>
     <div class="input"><span>密码</span><input id="password" name="password" type="password"/></div>
     <div class="btn-group">
-        <div id="login-clear" class="btn btn-default">清除</div>
+        <div id="login-wxuser" class="btn btn-default">授权</div>
         <div id="login-submit" class="btn btn-primary">提交</div>
     </div>
 </div>
@@ -70,8 +70,8 @@
                 })
         });
 
-        $("#login-clear").click(function () {
-            $("input").val('');
+        $("#login-wxuser").click(function () {
+            location.href = "{{@BASE}}/auth?ts=" + new Date().getTime();
         });
     });
 </script>

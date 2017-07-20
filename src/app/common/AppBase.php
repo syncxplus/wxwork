@@ -2,7 +2,7 @@
 
 namespace app\common;
 
-use helper\Wechat;
+use helper\Wxwork;
 
 class AppBase
 {
@@ -26,7 +26,7 @@ class AppBase
             'role' => $f3->get('SESSION.AUTHORIZATION')
         ];
         $f3->set('user', $this->user);
-        $f3->set('jsConfig', (new Wechat($f3))->getJsConfig($f3->REALM));
+        $f3->set('jsConfig', (new Wxwork($f3))->getJsConfig($f3->REALM));
     }
 
     function jsonResponse($data = [])

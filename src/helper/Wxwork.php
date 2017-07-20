@@ -5,21 +5,25 @@ namespace helper;
 use Httpful\Mime;
 use Httpful\Request;
 
-class Wechat
+class Wxwork
 {
     static private $CACHE_TOLERANCE = 300;
     static private $API = 'https://qyapi.weixin.qq.com';
     static private $GET_ACCESS_TOKEN = '/cgi-bin/gettoken';
     static private $GET_JS_TICKET = '/cgi-bin/get_jsapi_ticket';
+    static private $GET_USER_INFO = '/cgi-bin/user/getuserinfo';
+    static private $OAUTH2 = 'https://open.weixin.qq.com/connect/oauth2/authorize';
     private $f3;
     private $corpId;
     private $corpSecret;
+    private $agentId;
 
     function __construct($f3)
     {
         $this->f3 = $f3;
         $this->corpId = $f3->WXWORK_CORP_ID;
         $this->corpSecret = $f3->WXWORK_CORP_SECRET;
+        $this->agentId = $f3->WXWORK_AGENT_ID;
     }
 
     function getAccessToken()
@@ -93,5 +97,50 @@ class Wechat
         ];
 
         return $config;
+    }
+
+    function getUserInfo($code, $refresh = false)
+    {
+        $logger = new Logger($this->f3->LOGS);
+        $userInfo = $this->f3->WXWORK_USER_INFO;
+        if (!$userInfo || $refresh) {
+            $response = Request::get(self::$API . self::$GET_USER_INFO . '?' . http_build_query(['access_token' => $this->getAccessToken(), 'code' => $code]))
+                ->expectsType(Mime::JSON)
+                ->send();
+            if ($response->body) {
+                if ($response->body->errcode === 0) {
+                    $userInfo = $response->body;
+                    $expiresIn = $response->body->expires_in ? $response->body->expires_in : 7200;
+                    if (self::$CACHE_TOLERANCE < $expiresIn) {
+                        $this->f3->set('WXWORK_USER_INFO', $userInfo, $expiresIn - self::$CACHE_TOLERANCE);
+                    }
+                } else {
+                    $logger->error('Failed to get user info, (%d: %s)', [$response->body->errcode, $response->body->errmsg]);
+                }
+            } else {
+                $logger->error('Failed to get user info');
+                ob_start();
+                var_dump($response);
+                $logger->error(ob_get_clean());
+            }
+        }
+        return $userInfo;
+    }
+
+    function getOauth2Url($callback, $scope = 'snaapi_userinfo', $state = '')
+    {
+        $data = [
+            'appid' => $this->corpId,
+            'redirect_uri' => urlencode($callback),
+            'response_type' => 'code',
+            'scope' => $scope
+        ];
+        if ($scope != 'snsapi_base') {
+            $data['agentid'] = $this->agentId;
+        }
+        if (!empty($state)) {
+            $data['state'] = $state;
+        }
+        return self::$OAUTH2 . '?' . http_build_query($data) . '#wechat_redirect';
     }
 }

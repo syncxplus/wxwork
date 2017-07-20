@@ -2,7 +2,7 @@
 
 namespace test\helper;
 
-use helper\Wechat;
+use helper\Wxwork;
 use PHPUnit\Framework\TestCase;
 
 class WechatTest extends TestCase
@@ -10,7 +10,7 @@ class WechatTest extends TestCase
     public function testInit()
     {
         $f3 = \Base::instance();
-        $wechat = new Wechat($f3);
+        $wechat = new Wxwork($f3);
         $this->assertNotEmpty($wechat);
         return $wechat;
     }
