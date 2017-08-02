@@ -28,7 +28,7 @@ class Wxwork
 
     function getAccessToken()
     {
-        $logger = new Logger($this->f3->LOGS);
+        $logger = new \Logger();
         $accessToken = $this->f3->WXWORK_ACCESS_TOKEN;
         if (!$accessToken) {
             $response = Request::get(self::$API . self::$GET_ACCESS_TOKEN . '?' . http_build_query(['corpid' => $this->corpId, 'corpsecret' => $this->corpSecret]))
@@ -56,7 +56,7 @@ class Wxwork
 
     function getJsTicket()
     {
-        $logger = new Logger($this->f3->LOGS);
+        $logger = new \Logger();
         $jsTicket = $this->f3->WXWORK_JS_TICKET;
         if (!$jsTicket) {
             $response = Request::get(self::$API . self::$GET_JS_TICKET . '?' . http_build_query(['access_token' => $this->getAccessToken()]))
@@ -101,7 +101,7 @@ class Wxwork
 
     function getUserInfo($code, $refresh = false)
     {
-        $logger = new Logger($this->f3->LOGS);
+        $logger = new \Logger();
         $userInfo = $this->f3->WXWORK_USER_INFO;
         if (!$userInfo || $refresh) {
             $response = Request::get(self::$API . self::$GET_USER_INFO . '?' . http_build_query(['access_token' => $this->getAccessToken(), 'code' => $code]))

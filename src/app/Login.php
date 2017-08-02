@@ -2,12 +2,11 @@
 
 namespace app;
 
-use app\common\Service;
-use helper\Logger;
+use app\common\AppHelper;
 
 class Login
 {
-    use Service;
+    use AppHelper;
 
     private $administrator = ['debug'];
 
@@ -19,7 +18,7 @@ class Login
 
     function post($f3)
     {
-        $logger = new Logger($f3->LOGS);
+        $logger = new \Logger();
         $username = $_POST['username'];
         $password = $_POST['password'];
 

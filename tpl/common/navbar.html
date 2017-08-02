@@ -9,25 +9,27 @@
     </div>
 </nav>
 <script>
-    $(function () {
+    function getContext() {
         var base = "{{@BASE}}";
-        var prefix = location.protocol + "//" + location.host + base;
-        var url = location.href.substr(prefix.length);
-        if (url.indexOf("?") != -1) {
-            url = url.substr(0, url.indexOf("?"));
+        var server = location.protocol + "//" + location.host + base;
+        var context = location.href.substr(server.length);
+        if (context.indexOf("?") !== -1) {
+            context = context.substr(0, context.indexOf("?"));
         }
-        if (url.indexOf("#") != -1) {
-            url = url.substr(0, url.indexOf("#"));
+        if (context.indexOf("#") !== -1) {
+            context = context.substr(0, context.indexOf("#"));
         }
+        return context;
+    }
+    $(function () {
+        var context = getContext();
         $("nav.navbar-fixed-top a").each(function () {
-            var href = $(this).attr("href");
-            if (href == url) {
+            if ($(this).attr("href") === context) {
                 $(this).removeAttr("href");
                 $(this).parent().addClass("active");
                 return false;
             }
         });
-
         $("#logout").click(function () {
             if (confirm("Sure to Logout?")) {
                 location.href = "{{@BASE}}/Logout";

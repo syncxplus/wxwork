@@ -2,16 +2,16 @@
 
 namespace app;
 
-use app\common\Service;
+use app\common\AppHelper;
 
 class Logout
 {
-    use Service;
+    use AppHelper;
 
     function get($f3)
     {
         $f3->clear('SESSION.AUTHENTICATION');
         $f3->clear('SESSION.AUTHORIZATION');
-        header('location:' . $this->url($f3->get('BASE')));
+        header('location:' . $this->url());
     }
 }

@@ -2,12 +2,12 @@
 
 namespace app;
 
-use app\common\Service;
+use app\common\AppHelper;
 use helper\Wxwork;
 
 class User
 {
-    use Service;
+    use AppHelper;
 
     function auth($f3)
     {

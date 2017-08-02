@@ -6,7 +6,7 @@ use helper\Wxwork;
 
 class AppBase
 {
-    use Service;
+    use AppHelper;
 
     protected $error = ['code' => -1, 'text' => ''];
     protected $user;
@@ -31,12 +31,10 @@ class AppBase
 
     function jsonResponse($data = [])
     {
-        $result = ['error' => $this->error];
-        if (is_array($data)) {
-            $result = array_merge($result, $data);
-        } else {
-            $result[] = $data;
-        }
+        $result = [
+            'error' => $this->error,
+            'data' => $data
+        ];
         return json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 }

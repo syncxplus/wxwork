@@ -6,19 +6,19 @@ use DB\SQL;
 
 class Mysql extends SQL\Mapper
 {
-    private static $mysql;
+    static $NAME = 'MYSQL';
 
     static function db()
     {
-        if (self::$mysql == null) {
+        if (!\Registry::exists(self::$NAME)) {
             $f3 = \Base::instance();
-            self::$mysql = new SQL(
+            \Registry::set(self::$NAME, new SQL(
                 $f3->get('MYSQL_DSN'),
                 $f3->get('MYSQL_USER'),
                 $f3->get('MYSQL_PASSWORD')
-            );
+            ));
         }
-        return self::$mysql;
+        return \Registry::get(self::$NAME);
     }
 
     function merge($data)

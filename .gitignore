@@ -1,4 +1,5 @@
 /cfg/local.ini
-/data
 /composer.lock
+/html/data
+/runtime
 /vendor
