@@ -24,4 +24,15 @@ class User
         var_dump($state);
         echo json_encode($wxwork->getUserInfo($code, true));
     }
+
+    function all($f3)
+    {
+        $wx = new Wxwork($f3);
+        $users = json_encode($wx->getUserList(), JSON_UNESCAPED_UNICODE);
+        if (json_last_error()) {
+            echo json_last_error_msg();
+        } else {
+            echo $users;
+        }
+    }
 }

@@ -12,6 +12,7 @@ class Wxwork
     static private $GET_ACCESS_TOKEN = '/cgi-bin/gettoken';
     static private $GET_JS_TICKET = '/cgi-bin/get_jsapi_ticket';
     static private $GET_USER_INFO = '/cgi-bin/user/getuserinfo';
+    static private $GET_USER_LIST = '/cgi-bin/user/list';
     static private $OAUTH2 = 'https://open.weixin.qq.com/connect/oauth2/authorize';
     private $f3;
     private $corpId;
@@ -110,7 +111,7 @@ class Wxwork
             if ($response->body) {
                 if ($response->body->errcode === 0) {
                     $userInfo = $response->body;
-                    $expiresIn = $response->body->expires_in ? $response->body->expires_in : 7200;
+                    $expiresIn = $response->body->expires_in ?: 7200;
                     if (self::$CACHE_TOLERANCE < $expiresIn) {
                         $this->f3->set('WXWORK_USER_INFO', $userInfo, $expiresIn - self::$CACHE_TOLERANCE);
                     }
@@ -125,6 +126,33 @@ class Wxwork
             }
         }
         return $userInfo;
+    }
+
+    function getUserList()
+    {
+        $logger = new \Logger();
+        $response = Request::get(self::$API . self::$GET_USER_LIST . '?' . http_build_query([
+                'access_token' => $this->getAccessToken(),
+                'department_id' => 7,
+                'fetch_child' => 1,
+            ]))
+            ->expectsType(Mime::JSON)
+            ->send();
+        if ($response->body) {
+            if ($response->body->errcode === 0) {
+                $logger->info('Get user list no error');
+                return $response->body->userlist;
+            } else {
+                $logger->error('Failed to get user list, (%d: %s)', [$response->body->errcode, $response->body->errmsg]);
+            }
+        } else {
+            $logger->error('Failed to get user list');
+            ob_start();
+            var_dump($response);
+            $logger->error(ob_get_clean());
+        }
+        $logger->info('Return empty user list');
+        return [];
     }
 
     function getOauth2Url($callback, $scope = 'snaapi_userinfo', $state = '')
