@@ -55,10 +55,10 @@ class WechatUser extends TestCase
                 $n = date('n', time());
                 $m = ($n > 6) ? 7 : 1;
                 $date = date('Y') . '-0' . $m . '-01';
-                $p = round((strtotime($date) - strtotime($attrs[$name])) / 3600 / 24 / 30);
-                echo "";
-                $output = $avg * pow(1 + $rate, $p);
-                echo sprintf('%10.2f (%s, %d) ', $output, $attrs[$name], $p);
+                $p1 = round((strtotime($date) - strtotime($attrs[$name])) / 3600 / 24 / 30);
+                $p2 = array_sum($user->is_leader_in_dept) * 6;
+                $output = $avg * pow(1 + $rate, $p1 + $p2);
+                echo sprintf('%10.2f (%s, %d, %d) ', $output, $attrs[$name], $p1, $p2);
             }
             echo PHP_EOL;
         }

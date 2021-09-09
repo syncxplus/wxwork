@@ -1,0 +1,7 @@
+/Dockerfile
+/.idea
+/html/data
+/html/php.ini
+/runtime
+/test
+/cfg
