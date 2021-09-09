@@ -12,6 +12,7 @@ class Wxwork
     static private $GET_ACCESS_TOKEN = '/cgi-bin/gettoken';
     static private $GET_JS_TICKET = '/cgi-bin/get_jsapi_ticket';
     static private $GET_USER_INFO = '/cgi-bin/user/getuserinfo';
+    static private $GET_USER = '/cgi-bin/user/get';
     static private $GET_USER_LIST = '/cgi-bin/user/list';
     static private $OAUTH2 = 'https://open.weixin.qq.com/connect/oauth2/authorize';
     private $f3;
@@ -126,6 +127,17 @@ class Wxwork
             }
         }
         return $userInfo;
+    }
+
+    function getUser($id)
+    {
+        $response = Request::get(self::$API . self::$GET_USER . '?' . http_build_query([
+                'access_token' => $this->getAccessToken(),
+                'userid' => $id,
+            ]))
+            ->expectsType(Mime::JSON)
+            ->send();
+        return $response->body;
     }
 
     function getUserList()

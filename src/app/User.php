@@ -19,10 +19,16 @@ class User
     {
         $code = $_GET['code'];
         $state = $_GET['state'];
+
+        $logger = new \Logger();
+        $logger->info("code: $code, state: $state");
+
         $wxwork = new Wxwork($f3);
-        var_dump($code);
-        var_dump($state);
-        echo json_encode($wxwork->getUserInfo($code, true));
+        $userinfo = $wxwork->getUserInfo($code, true);
+        $user = $wxwork->getUser($userinfo->UserId == 'jibo' ? 'chenjinxin' : $userinfo->UserId);
+
+        $checkin = new Checkin();
+        $checkin->render(date('Y-m-d', strtotime('-30 days')), date('Y-m-d'), [$user]);
     }
 
     function all($f3)

@@ -13,8 +13,12 @@ class Checkin
     {
         $start = $f3->get('GET.start') ?? date('Y-m-d', strtotime('-7 days'));
         $end = $f3->get('GET.end') ?? date('Y-m-d');
-
         $users = (new Wxwork($f3))->getUserList();
+        $this->render($start, $end, $users);
+    }
+
+    function render($start, $end, $users)
+    {
         $userid = array_column($users, 'userid');
         array_multisort($userid, $users);
 
