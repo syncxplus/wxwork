@@ -11,9 +11,33 @@ class Checkin
 {
     function get($f3)
     {
-        $start = $f3->get('GET.start') ?? date('Y-m-d', strtotime('-7 days'));
-        $end = $f3->get('GET.end') ?? date('Y-m-d');
-        $users = (new Wxwork($f3))->getUserList();
+        $dateRange = $f3->get('GET.dr') ?? '';
+        switch ($dateRange) {
+            case 1:
+                $start = date('Y-m-d', strtotime('-30 days'));
+                $end = date('Y-m-d');
+                break;
+            case 2:
+                $start = date('Y-m-d', strtotime(date('Y-m-01') . ' -1 month'));
+                $end = date('Y-m-d', strtotime(date('Y-m-01') . ' -1 day'));
+                break;
+            case 3:
+                $start = date('Y-m-01');
+                $end = date('Y-m-d');
+                break;
+            default:
+                $start = $f3->get('GET.start') ?? date('Y-m-d', strtotime('-7 days'));
+                $end = $f3->get('GET.end') ?? date('Y-m-d');
+                if (strtotime($start) > strtotime($end)) {
+                    $tmp = $start;
+                    $start = $end;
+                    $end = $tmp;
+                }
+        }
+        $f3->set('dr', $dateRange);
+        $id = $f3->get('GET.userid') ?? '';
+        $wx = new Wxwork($f3);
+        $users = $id ? [$wx->getUser($id)] : $wx->getUserList();
         $this->render($start, $end, $users);
     }
 
@@ -24,10 +48,23 @@ class Checkin
 
         echo <<<HTML
         <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" rel="stylesheet">
         </head>
-        <body class="container mt-1 mb-5">
-        <div style="font-size: 2rem"><span>$start</span><span style="float: right">$end</span></div>
+        <body class="container-fluid mb-5">
+        <div style="display:flex;justify-content:space-between;margin:1rem 0;width:100%">
+            <div><input class="form-control" name="start" value="$start"/></div>
+            <div>
+                <select class="form-control" name="date-range">
+                    <option value=""></option>
+                    <option value="1">Last 30 days</option>
+                    <option value="2">Last Month</option>
+                    <option value="3">This Month</option>
+                </select>
+            </div>
+            <div><input class="form-control" name="end" value="$end"/></div>
+        </div>
         <table class="table">
         HTML;
 
@@ -60,14 +97,48 @@ class Checkin
                 if (!$this->acceptTimeException($users[$key]->name, $v)) {
                     if (!$exception) {
                         $exception = true;
-                        echo "<tr class='bg-secondary text-light'><td colspan='5'>" . $users[$key]->name . '</td></tr>';
+                        echo "<tr class='table-warning'><td colspan='3'>" . $users[$key]->name . '</td></tr>';
                     }
-                    echo "<tr><td>$k</td><td>{$v['in']}</td><td>{$v['in_exception']}</td><td>{$v['out']}</td><td>{$v['out_exception']}</td></tr>";
+                    echo "<tr><td>$k</td><td>{$v['in']}<br/><span class='text-danger'>{$v['in_exception']}</span></td><td>{$v['out']}<br/><span class='text-danger'>{$v['out_exception']}</span></td></tr>";
                 }
             }
         }
 
-        echo '</table></body>';
+        $dr = \Base::instance()->get('dr');
+        $id = (count($users) == 1) ? $users[0]->userid : '';
+        echo <<<HTML
+        </table>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                let select = document.querySelector("select");
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value == "$dr") {
+                        select.options[i].selected = true;
+                        break;
+                    }
+                }
+                let value = select.value;
+                select.addEventListener("change", function (e) {
+                    let v = e.target.value;
+                    if (v != value) {
+                        location.replace("/Checkin?dr=" + v + "&userid=$id");
+                    }
+                })
+                document.querySelectorAll("input").forEach(function(e) {
+                    e.addEventListener("keyup", function (k) {
+                        if (k.key === "Enter") {
+                            let start = document.querySelector("input[name=start]").value;
+                            let end = document.querySelector("input[name=end]").value;
+                            if (start != "$start" || end != "$end") {
+                                location.replace("/Checkin?start=" + start + "&end=" + end);
+                            }
+                        }
+                    })
+                })
+            })
+        </script>
+        </body>
+        HTML;
     }
 
     function getCheckinData($start, $end, $users)
