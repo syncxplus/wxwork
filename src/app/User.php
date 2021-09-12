@@ -25,10 +25,10 @@ class User
 
         $wxwork = new Wxwork($f3);
         $userinfo = $wxwork->getUserInfo($code, true);
-        $user = $wxwork->getUser($userinfo->UserId == 'jibo' ? 'chenjinxin' : $userinfo->UserId);
+        $users = $userinfo->UserId == 'jibo' ? $wxwork->getUserList() : [$wxwork->getUser($userinfo->UserId)];
 
         $checkin = new Checkin();
-        $checkin->render(date('Y-m-d', strtotime('-30 days')), date('Y-m-d'), [$user]);
+        $checkin->render(date('Y-m-d', strtotime('-30 days')), date('Y-m-d'), $users);
     }
 
     function all($f3)
