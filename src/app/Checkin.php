@@ -58,9 +58,9 @@ class Checkin
             <div>
                 <select class="form-control" name="date-range">
                     <option value=""></option>
-                    <option value="1">Last 30 days</option>
-                    <option value="2">Last Month</option>
-                    <option value="3">This Month</option>
+                    <option value="1">近30天</option>
+                    <option value="2">上月</option>
+                    <option value="3">本月</option>
                 </select>
             </div>
             <div><input class="form-control" name="end" value="$end"/></div>
