@@ -8,7 +8,7 @@ class Login
 {
     use AppHelper;
 
-    private $administrator = ['debug'];
+    static $ADMIN = ['jibo'];
 
     function get($f3)
     {
@@ -27,7 +27,7 @@ class Login
         if ($this->validate($username, $password)) {
             $logger->info('User (%s) login success', $username);
             $f3->set('SESSION.AUTHENTICATION', $username);
-            $f3->set('SESSION.AUTHORIZATION', in_array($username, $this->administrator) ? 'administrator' : 'user');
+            $f3->set('SESSION.AUTHORIZATION', in_array($username, self::$ADMIN) ? 'administrator' : 'user');
             echo json_encode([
                 'error' => ['code' => 0]
             ]);

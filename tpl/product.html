@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include href="common/header.html"/>
+    <style>
+        .input-group {
+            padding-top: 2.5rem;
+        }
+        #ok {
+            background-color: green;
+            border: darkgreen;
+            color: white;
+            cursor: pointer;
+        }
+        .product-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .media {
+            display: flex;
+        }
+        .media:first-child {
+            margin-top: 5rem;
+        }
+        .media-body {
+            width: auto;
+        }
+        .label {
+            padding-right: 1.2rem;
+            font-weight: normal;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="input-group">
+        <input type="text" name="keyword" class="form-control" value="{{@keyword}}" placeholder="输入产品SKU"/>
+        <span id="ok" class="input-group-addon bg-primary text-light">OK</span>
+    </div>
+    <check if="{{@errMsg}}">
+    <div class="alert alert-danger" role="alert">{{@errMsg}}</div>
+    </check>
+    <check if="{{@products}}">
+    <repeat group="{{@products}}" value="{{@product}}">
+    <div class="product-container">
+        <div class="media">
+            <div class="media-left media-middle">
+                <img class="media-object" src="{{@product['thumb']}}" alt="{{@product['model']}}">
+            </div>
+            <div class="media-body">
+                <h4 class="media-heading">{{@product['model']}}</h4>
+                <repeat group="{{@product['price']}}" key="{{@key}}" value="{{@price}}">
+                <div>
+                    <check if="{{@key==@product['manufactory']}}">
+                        <true><span class="label label-danger">{{@key}}</span></true>
+                        <false><span class="label label-default">{{@key}}</span></false>
+                    </check>
+                    <span class="label label-warning">{{@price["cost"]}}</span>
+                    <span class="label label-success">{{@price["volume"]}}</span>
+                </div>
+                </repeat>
+            </div>
+        </div>
+    </div>
+    </repeat>
+    </check>
+</div>
+<script>
+    $(function () {
+        $("#ok").on("click", function () {
+            let keyword = document.querySelector("input[name=keyword]").value;
+            if (keyword) {
+                location.href = "{{@BASE}}/Product?keyword=" + keyword;
+            } else {
+                alert("请输入SKU");
+            }
+        })
+    });
+</script>
+</body>
+</html>

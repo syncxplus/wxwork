@@ -25,10 +25,11 @@ class User
 
         $wxwork = new Wxwork($f3);
         $userinfo = $wxwork->getUserInfo($code, true);
-        $users = $userinfo->UserId == 'jibo' ? $wxwork->getUserList() : [$wxwork->getUser($userinfo->UserId)];
-
-        $checkin = new Checkin();
-        $checkin->render(date('Y-m-d', strtotime('-30 days')), date('Y-m-d'), $users);
+        $userid = $userinfo->UserId;
+        $f3->set('userid', $userinfo->UserId);
+        $f3->set('SESSION.AUTHENTICATION', $userid);
+        $f3->set('SESSION.AUTHORIZATION', in_array($userid, Login::$ADMIN) ? 'administrator' : 'user');
+        (new Menu())->get($f3);
     }
 
     function all($f3)

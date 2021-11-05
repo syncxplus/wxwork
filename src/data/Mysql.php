@@ -4,37 +4,24 @@ namespace data;
 
 use DB\SQL;
 
-class Mysql extends SQL\Mapper
+class Mysql extends \Prefab
 {
-    static $NAME = 'MYSQL';
+    const PERIOD_IN_ADVANCE = 300;
+    private $db;
+    private $expireTime;
 
-    static function db()
+    function get()
     {
-        if (!\Registry::exists(self::$NAME)) {
+        if (time() > $this->expireTime ?? 0) {
             $f3 = \Base::instance();
-            \Registry::set(self::$NAME, new SQL(
+            $this->db = new SQL(
                 $f3->get('MYSQL_DSN'),
                 $f3->get('MYSQL_USER'),
                 $f3->get('MYSQL_PASSWORD')
-            ));
+            );
+            list($timeout) = $this->db->exec('show variables like ?', ['wait_timeout']);
+            $this->expireTime = time() + $timeout['Value'] - self::PERIOD_IN_ADVANCE;
         }
-        return \Registry::get(self::$NAME);
-    }
-
-    function merge($data)
-    {
-        if (is_array($data)) {
-            $fields = $this->fields();
-            foreach ($data as $fieldName => $fieldValue) {
-                if (in_array($fieldName, $fields)) {
-                    $this->set($fieldName, $fieldValue);
-                }
-            }
-        }
-    }
-
-    function __construct($table, $ttl = 0)
-    {
-        parent::__construct(self::db(), $table, null, $ttl);
+        return $this->db;
     }
 }

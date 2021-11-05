@@ -37,7 +37,11 @@ class Checkin
         $f3->set('dr', $dateRange);
         $id = $f3->get('GET.userid') ?? '';
         $wx = new Wxwork($f3);
-        $users = $id ? [$wx->getUser($id)] : $wx->getUserList();
+        if (empty($id) || $id == 'jibo') {
+            $users = $wx->getUserList();
+        } else {
+            $users = [$wx->getUser($id)];
+        }
         $this->render($start, $end, $users);
     }
 

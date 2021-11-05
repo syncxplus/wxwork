@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <include href="common/header.html"/>
+    <style>
+        .menu-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+        .menu-container .btn {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            margin: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="menu-container">
+    <div class="btn btn-default" data-name="checkin">查看考勤</div>
+    <div class="btn btn-danger" data-name="product">查询产品</div>
+</div>
+<script>
+    $(function () {
+        document.querySelector("div.menu-container").style.height = window.innerHeight + "px";
+        $(".menu-container .btn").on("click", function () {
+            let name = $(this).data("name");
+            switch (name) {
+                case "checkin":
+                    location.href = "{{@BASE}}/Checkin?userid={{@userid}}";
+                    break;
+                case "product":
+                    location.href = "{{@BASE}}/Product";
+                    break;
+                default:
+                    alert("Unknown option: " + name);
+            }
+        });
+    });
+</script>
+</body>
+</html>
