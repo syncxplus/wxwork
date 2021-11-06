@@ -9,7 +9,7 @@ class MysqlTest extends TestCase
 {
     public function testConnection()
     {
-        $db = Mysql::db();
+        $db = Mysql::instance()->get();
         $this->assertNotEmpty($db);
         $this->assertNotEmpty($db->exec('SELECT 1'));
     }
