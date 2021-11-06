@@ -10,8 +10,7 @@ class Logout
 
     function get($f3)
     {
-        $f3->clear('SESSION.AUTHENTICATION');
-        $f3->clear('SESSION.AUTHORIZATION');
+        $f3->clear('SESSION.USERID');
         header('location:' . $this->url());
     }
 }

@@ -35,12 +35,12 @@ class Checkin
                 }
         }
         $f3->set('dr', $dateRange);
-        $id = $f3->get('GET.userid') ?? '';
+        $userid = $f3->get('SESSION.USERID');
         $wx = new Wxwork($f3);
-        if (empty($id) || $id == 'jibo') {
+        if (empty($userid) || $userid == 'jibo') {
             $users = $wx->getUserList();
         } else {
-            $users = [$wx->getUser($id)];
+            $users = [$wx->getUser($userid)];
         }
         $this->render($start, $end, $users);
     }

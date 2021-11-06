@@ -27,8 +27,7 @@ class User
         $userinfo = $wxwork->getUserInfo($code, true);
         $userid = $userinfo->UserId;
         $f3->set('userid', $userinfo->UserId);
-        $f3->set('SESSION.AUTHENTICATION', $userid);
-        $f3->set('SESSION.AUTHORIZATION', in_array($userid, Login::$ADMIN) ? 'administrator' : 'user');
+        $f3->set('SESSION.USERID', $userid);
         (new Menu())->get($f3);
     }
 

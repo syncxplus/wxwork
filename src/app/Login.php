@@ -8,8 +8,6 @@ class Login
 {
     use AppHelper;
 
-    static $ADMIN = ['jibo'];
-
     function get($f3)
     {
         $f3->set('title', '登录');
@@ -26,8 +24,7 @@ class Login
 
         if ($this->validate($username, $password)) {
             $logger->info('User (%s) login success', $username);
-            $f3->set('SESSION.AUTHENTICATION', $username);
-            $f3->set('SESSION.AUTHORIZATION', in_array($username, self::$ADMIN) ? 'administrator' : 'user');
+            $f3->set('SESSION.USERID', $username);
             echo json_encode([
                 'error' => ['code' => 0]
             ]);

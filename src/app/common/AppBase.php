@@ -9,11 +9,14 @@ class AppBase
     use AppHelper;
 
     protected $error = ['code' => -1, 'text' => ''];
-    protected $user;
+    protected $userid;
 
     function beforeRoute($f3)
     {
-        if (!$f3->get('SESSION.AUTHENTICATION')) {
+        if ($this->userid = $f3->get('SESSION.USERID')) {
+            $f3->set('userid', $this->userid);
+            $f3->set('jsConfig', (new Wxwork($f3))->getJsConfig($f3->REALM));
+        } else {
             if ($f3->VERB == 'GET') {
                 setcookie('target', $f3->REALM, 0, '/');
             } else {
@@ -21,12 +24,6 @@ class AppBase
             }
             $f3->reroute($this->url('/Login'));
         }
-        $this->user = [
-            'name' => $f3->get('SESSION.AUTHENTICATION'),
-            'role' => $f3->get('SESSION.AUTHORIZATION')
-        ];
-        $f3->set('user', $this->user);
-        $f3->set('jsConfig', (new Wxwork($f3))->getJsConfig($f3->REALM));
     }
 
     function jsonResponse($data = [])
