@@ -42,6 +42,7 @@ class Checkin
         } else {
             $users = [$wx->getUser($userid)];
         }
+        //echo '<pre>', json_encode($users, JSON_UNESCAPED_UNICODE), '</pre>';
         $this->render($start, $end, $users);
     }
 
@@ -98,7 +99,7 @@ class Checkin
             }
             $exception = false;
             foreach ($stats as $k => $v) {
-                if (!$this->acceptTimeException($users[$key]->name, $v)) {
+                if (!$this->acceptTimeException($users[$key]->name, $k, $v)) {
                     if (!$exception) {
                         $exception = true;
                         echo "<tr class='table-warning'><td colspan='3'>" . $users[$key]->name . '</td></tr>';
@@ -175,7 +176,7 @@ class Checkin
         return [];
     }
 
-    function acceptTimeException($name, $exception)
+    function acceptTimeException($name, $date, $exception)
     {
         $ie = $exception['in_exception'];
         $oe = $exception['out_exception'];
@@ -184,21 +185,36 @@ class Checkin
         } else if ($ie == '未打卡' || $oe == '未打卡') {//not time exception
             return false;
         }
-        $rules = [
-            '曹晓锦' => '8:00-17:00',
-            '周玉兰' => '9:30-18:00|9:00-17:30',
-        ];
-        $rule = $rules[$name];
-        if (!$rule) {//no rule for the time exception
-            return false;
-        }
         $in = str_replace(':', '', $exception['in']);
         $out = str_replace(':', '', $exception['out']);
-        $options = explode('|', $rule);
-        foreach ($options as $option) {
-            $threshold = explode('-', str_replace(':', '', $option));
-            return $in <= $threshold[0] && $out >= $threshold[1];
+        $rules = [];
+        if ($userRule = $this->userRules[$name]) {
+            $explode = explode('|', $userRule);
+            foreach ($explode as $rule) {
+                $rules[] = $rule;
+            }
+        }
+        if ($dateRule = $this->dateRules[$date]) {
+            $explode = explode('|', $dateRule);
+            foreach ($explode as $rule) {
+                $rules[] = $rule;
+            }
+        }
+        $rules = array_unique($rules);
+        foreach ($rules as $rule) {
+            $threshold = explode('-', str_replace(':', '', $rule));
+            if ($in <= $threshold[0] && $out >= $threshold[1]) {
+                return true;
+            }
         }
         return false;
     }
+
+    private $userRules = [
+        '曹晓锦' => '8:00-17:00',
+        '周玉兰' => '9:30-18:00|9:00-17:30',
+    ];
+    private $dateRules = [
+        '2021-12-21' => '9:00-17:00',
+    ];
 }
