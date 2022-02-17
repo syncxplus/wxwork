@@ -211,7 +211,7 @@ class Checkin
     }
 
     private $userRules = [
-        '曹晓锦' => '8:00-17:00',
+        '曹晓锦' => '7:50-16:50',
         '周玉兰' => '9:30-18:00|9:00-17:30',
     ];
     private $dateRules = [

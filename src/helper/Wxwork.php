@@ -145,7 +145,7 @@ class Wxwork
         $logger = new \Logger();
         $response = Request::get(self::$API . self::$GET_USER_LIST . '?' . http_build_query([
                 'access_token' => $this->getAccessToken(),
-                'department_id' => 7,
+                'department_id' => 1,
                 'fetch_child' => 1,
             ]))
             ->expectsType(Mime::JSON)
