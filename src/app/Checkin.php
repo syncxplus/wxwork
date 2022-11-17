@@ -81,7 +81,7 @@ class Checkin
             $logger->info($users[$key]->name);
             foreach ($query as $line) {
                 if ($line->userid == $user) {
-                    $logger->info(date('Y-m-d H:m', $line->checkin_time));
+                    $logger->info(date('Y-m-d H:i', $line->checkin_time));
                     $logger->info($line->excetpion_type);
                     $date = date('Y-m-d', $line->checkin_time);
                     if (!isset($stats[$date])) {
@@ -93,7 +93,7 @@ class Checkin
                     if ($e == '未打卡') {
                         $stats[$date][$prefix] = '';
                     } else {
-                        $stats[$date][$prefix] = date('H:m', $line->checkin_time);
+                        $stats[$date][$prefix] = date('H:i', $line->checkin_time);
                     }
                 }
             }
