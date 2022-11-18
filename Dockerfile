@@ -1,4 +1,4 @@
-FROM syncxplus/php:7.4.24-apache-buster
+FROM --platform=linux/amd64 syncxplus/php:7.4.33-apache-buster
 
 LABEL maintainer=jibo@outlook.com
 
