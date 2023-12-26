@@ -31,7 +31,7 @@
             let name = $(this).data("name");
             switch (name) {
                 case "checkin":
-                    location.href = "{{@BASE}}/Checkin?userid={{@userid}}";
+                    location.href = "{{@BASE}}/Checkin?dr=1&userid={{@userid}}";
                     break;
                 case "product":
                     location.href = "{{@BASE}}/Product";
