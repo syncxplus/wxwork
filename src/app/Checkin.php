@@ -98,17 +98,24 @@ class Checkin
                     }
                 }
             }
-            $exception = false;
+            $exception = 0;
+            $html = [];
             foreach ($stats as $k => $v) {
                 if (!$this->acceptTimeException($users[$key]->name, $k, $v)) {
-                    if (!$exception) {
-                        $exception = true;
-                        echo "<tr class='table-warning'><td colspan='3'>", $users[$key]->name, "&nbsp;", $users[$key]->userid, '</td></tr>';
+                    if ($exception == 0) {
+                        $html[] = "<tr class='table-warning'><td colspan='3'>" . $users[$key]->name . "&nbsp;" . $users[$key]->userid . "&nbsp;";
                     }
-                    echo "<tr><td>$k</td><td>{$v['in']}<br/><span class='text-danger'>{$v['in_exception']}</span></td><td>{$v['out']}<br/><span class='text-danger'>{$v['out_exception']}</span></td></tr>";
+                    $exception++;
+                    $html[] = "<tr><td>$k</td><td>{$v['in']}<br/><span class='text-danger'>{$v['in_exception']}</span></td><td>{$v['out']}<br/><span class='text-danger'>{$v['out_exception']}</span></td></tr>";
                 }
             }
-            if ($exception && $_GET['debug']) echo '<tr><td class="font-weight-light text-muted" colspan="3"><pre style="white-space:pre-wrap;word-wrap:break-word">' . implode(PHP_EOL, $raw) . '</pre></td></tr>';
+            if ($exception) {
+                $html[0] .= "$exception</td></tr>";
+                if ($_GET['debug']) {
+                    $html[] = '<tr><td class="font-weight-light text-muted" colspan="3"><pre style="white-space:pre-wrap;word-wrap:break-word">' . implode(PHP_EOL, $raw) . '</pre></td></tr>';
+                }
+                echo implode('', $html);
+            }
         }
         echo '</table>';
 
@@ -124,6 +131,7 @@ class Checkin
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll("tr.table-warning").forEach(function (e) {
+            e.style.cursor = 'pointer';
             e.addEventListener("click", function () {
                 let txt = e.innerText.split(/\s/);
                 let userid = txt[1];
