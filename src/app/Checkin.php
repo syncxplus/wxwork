@@ -35,21 +35,21 @@ class Checkin
                 }
         }
         $f3->set('dr', $dateRange);
-        $userid = $f3->get('SESSION.USERID');
+        $userid = $_GET['userid'] ?: $f3->get('SESSION.USERID');
         $wx = new Wxwork($f3);
         if (empty($userid) || $userid == 'jibo') {
             $users = $wx->getUserList();
         } else {
             $users = [$wx->getUser($userid)];
         }
-        //echo '<pre>', json_encode($users, JSON_UNESCAPED_UNICODE), '</pre>';
         $this->render($start, $end, $users);
     }
 
     function render($start, $end, $users)
     {
+        $logger = new \Logger();
         $userid = array_column($users, 'userid');
-        array_multisort($userid, $users);
+        $query = $this->getCheckinData($start, $end, $userid);
 
         echo <<<HTML
         <head>
@@ -70,13 +70,11 @@ class Checkin
             </div>
             <div><input class="form-control" name="end" value="$end"/></div>
         </div>
-        <table class="table">
         HTML;
 
-        $logger = new \Logger();
-        $checkin = new Checkin();
-        $query = $checkin->getCheckinData($start, $end, $userid);
+        echo '<table class="table">';
         foreach ($userid as $key => $user) {
+            $raw = [];
             $stats = [];
             $logger->info($users[$key]->name);
             foreach ($query as $line) {
@@ -89,6 +87,9 @@ class Checkin
                     }
                     $prefix = date('G', $line->checkin_time) <= 12 ? 'in' : 'out';
                     $e = $line->exception_type;
+                    if ($e) {
+                        $raw[] = json_encode($line, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    }
                     $stats[$date][$prefix . '_exception'] = $e;
                     if ($e == '未打卡') {
                         $stats[$date][$prefix] = '';
@@ -102,17 +103,21 @@ class Checkin
                 if (!$this->acceptTimeException($users[$key]->name, $k, $v)) {
                     if (!$exception) {
                         $exception = true;
-                        echo "<tr class='table-warning'><td colspan='3'>" . $users[$key]->name . '</td></tr>';
+                        echo "<tr class='table-warning'><td colspan='3'>", $users[$key]->name, "&nbsp;", $users[$key]->userid, '</td></tr>';
                     }
                     echo "<tr><td>$k</td><td>{$v['in']}<br/><span class='text-danger'>{$v['in_exception']}</span></td><td>{$v['out']}<br/><span class='text-danger'>{$v['out_exception']}</span></td></tr>";
                 }
             }
+            if ($exception && $_GET['debug']) echo '<tr><td class="font-weight-light text-muted" colspan="3"><pre style="white-space:pre-wrap;word-wrap:break-word">' . implode(PHP_EOL, $raw) . '</pre></td></tr>';
         }
+        echo '</table>';
+
+        if ($_GET['debug']) echo '<pre style="margin-top:1rem;margin-bottom:1rem;white-space:pre-wrap;word-wrap:break-word">', json_encode($users, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), '</pre>';
 
         $dr = \Base::instance()->get('dr');
-        $id = (count($users) == 1) ? $users[0]->userid : '';
+        $queryStrDebug = $_GET['debug'] ? '&debug=1' : '';
+        $queryStrUserid = (count($userid) == 1) ? "&userid=$userid[0]" : '';
         echo <<<HTML
-        </table>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 let select = document.querySelector("select");
@@ -126,7 +131,7 @@ class Checkin
                 select.addEventListener("change", function (e) {
                     let v = e.target.value;
                     if (v != value) {
-                        location.replace("/Checkin?dr=" + v + "&userid=$id");
+                        location.replace("/Checkin?dr=" + v + "$queryStrDebug$queryStrUserid");
                     }
                 })
                 document.querySelectorAll("input").forEach(function(e) {
@@ -176,8 +181,11 @@ class Checkin
         return [];
     }
 
-    function acceptTimeException($name, $date, $exception)
+    function acceptTimeException($name, $date, &$exception)
     {
+        if (in_array($name, $this->ignore)) {
+            return true;
+        }
         $ie = $exception['in_exception'];
         $oe = $exception['out_exception'];
         if (!$ie && !$oe) {//no exception
@@ -203,7 +211,17 @@ class Checkin
         $rules = array_unique($rules);
         foreach ($rules as $rule) {
             $threshold = explode('-', str_replace(':', '', $rule));
-            if ($in <= $threshold[0] && $out >= $threshold[1]) {
+            if ($in > $threshold[0]) {
+                $exception['in_exception'] = $exception['in_exception'] ?: 'c:时间异常';
+            }  else {
+                $exception['in_exception'] = '';
+            }
+            if ($out < $threshold[1]) {
+                $exception['out_exception'] = $exception['out_exception'] ?: 'c:时间异常';
+            } else {
+                $exception['out_exception'] = '';
+            }
+            if ((strlen($exception['in_exception']) + strlen($exception['out_exception'])) == 0) {
                 return true;
             }
         }
@@ -213,6 +231,10 @@ class Checkin
     private $userRules = [
         '曹晓锦' => '7:50-16:50',
         '周玉兰' => '9:30-18:00|9:00-17:30',
+        '李莉媛' => '9:00-17:00',
+    ];
+    private $ignore = [
+        '左婵',
     ];
     private $dateRules = [
         '2021-12-21' => '9:00-17:00',
