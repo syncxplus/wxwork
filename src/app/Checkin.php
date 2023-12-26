@@ -82,13 +82,13 @@ class Checkin
                     $logger->info(date('Y-m-d H:i', $line->checkin_time));
                     $logger->info($line->excetpion_type);
                     $date = date('Y-m-d', $line->checkin_time);
-                    if (!isset($stats[$date])) {
-                        $stats[$date] = [];
-                    }
-                    $prefix = date('G', $line->checkin_time) <= 12 ? 'in' : 'out';
+                    $prefix = date('G', $line->checkin_time) < 12 ? 'in' : 'out';
                     $e = $line->exception_type;
                     if ($e) {
                         $raw[] = json_encode($line, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                        if (!isset($stats[$date])) {
+                            $stats[$date] = [];
+                        }
                     }
                     $stats[$date][$prefix . '_exception'] = $e;
                     if ($e == '未打卡') {
@@ -116,7 +116,26 @@ class Checkin
 
         $dr = \Base::instance()->get('dr');
         $queryStrDebug = $_GET['debug'] ? '&debug=1' : '';
-        $queryStrUserid = (count($userid) == 1) ? "&userid=$userid[0]" : '';
+        if (count($userid) == 1) {
+            $queryStrUserid = "&userid=$userid[0]";
+        } else {
+            $queryStrUserid = "";
+            echo <<<HTML
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll("tr.table-warning").forEach(function (e) {
+            e.addEventListener("click", function () {
+                let txt = e.innerText.split(/\s/);
+                let userid = txt[1];
+                if (userid) {
+                    window.open("/Checkin?dr=" + document.querySelector("select").value + "&userid=" + userid + "&debug=1");
+                }
+            })
+        })
+    })
+</script>
+HTML;
+        }
         echo <<<HTML
         <script>
             document.addEventListener('DOMContentLoaded', function () {
